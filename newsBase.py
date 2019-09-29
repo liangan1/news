@@ -43,6 +43,22 @@ class NewsParserBase:
           self.soup = Spider(url).soup() #convert html to BeautifulSoup object
           self.newsList = []
       
+      def get_tag_by_name(self, tag = "ul", class_name = ""):
+          '''
+          The news list are generally 'ul/table' tag with specific 'class' name in html.
+          Every news is generally a 'ref' tag.
+          For example:
+              <ul class="nlist">
+                 <div> 
+                  <li class="zhiti"><span style="float: right;">[2019-09-27]</span><a href="/2019/0927/c11157a209885/page.htm" title=""></a></li>
+                                        
+                  <li class="zhiti"><span style="float: right;">[2019-09-27]</span><a href="/2019/0927/c11157a209884/page.htm" title=""></a></li>
+                 </div>
+              </ul>
+          '''          
+          tag = self.soup.find_all(ul, attrs={"class":class_name}) 
+          return tag
+
       @abstractmethod
       def parse_html(self): 
           raise RuntimeError,  ' "parse_html". method must be overwrite in subclass'
