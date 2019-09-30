@@ -76,8 +76,8 @@ class NewsParserBase:
          '''
          now_time = datetime.datetime.now()
          today_news = []
-         for news in self.newsList:
-              time_delta = now_time - today_news
+         for news in self.news_list:
+              time_delta = now_time - news.date
               if time_delta.days < 1:
                  today_news.append(news)
          return today_news

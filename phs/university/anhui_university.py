@@ -28,6 +28,10 @@ class AHUCSNews(newsBase.NewsParserBase):
 if __name__ == '__main__':
     news_instance = AHUCSNews()
     news_list = news_instance.parse_html()
+    print("All news:")
     for news in news_list:
         print(news.get_university(), news.school, news.title, news.date, news.href)
-     
+    today_news = news_instance.get_today_news()
+    print("today_news:")
+    for news in today_news:
+        print(news.get_university(), news.school, news.title, news.date, news.href)
