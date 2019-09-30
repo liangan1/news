@@ -1,10 +1,10 @@
 # news
 This project is used to get  the  news for  post-graduate entrance examination of  computer science.
 
-#Environment 
+# Environment 
 Anaconda3
 
-#run 
+# run 
 
 git clone https://github.com/liangan1/news.git
 cd news 
