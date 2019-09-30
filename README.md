@@ -5,9 +5,10 @@ This project is used to get  the  news for  post-graduate entrance examination o
 Anaconda3
 
 # run 
-
+```bash
 git clone https://github.com/liangan1/news.git
-cd news 
+cd news
 export PYTHONPATH=$PYTHONPATH:$(pwd)/phs:export PYTHONPATH=$PYTHONPATH:$(pwd)
 cd phs/phs/university
 python anhui_university.py
+```
