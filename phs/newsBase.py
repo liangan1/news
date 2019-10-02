@@ -5,6 +5,7 @@ import datetime
 from abc import abstractmethod
 import re
 import bs4
+import time
 
 class News:
      """
@@ -73,17 +74,32 @@ class NewsParserBase:
           tags = None
           for body in self.soup: 
               tags = body.find_all(tag, attrs={attr:value})
-              if tags is not None:
+              if tags is not None and len(tags):
                  break 
           return tags
-          
+
+     def validate(self, date_text):
+          try:
+              if date_text != datetime.datetime.strptime(date_text, "%Y-%m-%d").strftime('%Y-%m-%d'):
+                  raise ValueError
+              return True
+          except ValueError:
+              return False
+ 
      def get_news_date(self, tag = None):
          '''
          DFS(Depth First Search) is used to find the news date
          '''
          date_str = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",str(tag))
-         if date_str is not None:
-            return datetime.datetime.strptime(date_str[0], "%Y-%m-%d")  
+         if date_str is not None and self.validate(date_str[0]):
+            return datetime.datetime.strptime(date_str[0], "%Y-%m-%d")
+         
+         #date_str = re.search(r"(\d{1,2}-\d{1,2})",str(tag))
+         #if date_str is not None:
+         #   now_year = datetime.datetime.now().strftime("%Y")
+         #   if self.validate(now_year + "-" + date_str[0]):
+         #      return datetime.datetime.strptime(now_year + "-" + date_str[0], "%Y-%m-%d")
+ 
          if isinstance(tag, bs4.element.Tag):
             for child in tag.children:
                 self.get_news_date(child)
@@ -100,8 +116,8 @@ class NewsParserBase:
                      for child_child in child:
                           date = self.get_news_date(child_child)
                           a_tag = child_child.find("a")
-                          if a_tag is not None and isinstance(a_tag, bs4.element.Tag):
-                              print(a_tag)
+                          if a_tag is not None and date is not None \
+                             and isinstance(a_tag, bs4.element.Tag):
                               attrs = a_tag.attrs
                               href = root_url + attrs['href']
                               title = a_tag.text
@@ -111,8 +127,8 @@ class NewsParserBase:
                  else:
                      date = self.get_news_date(child)
                      a_tag = child.find("a")
-                     if a_tag is not None and isinstance(a_tag, bs4.element.Tag):
-                         print(a_tag)
+                     if a_tag is not None and date is not None \
+                        and isinstance(a_tag, bs4.element.Tag):
                          attrs = a_tag.attrs
                          href = root_url + attrs['href']
                          title = a_tag.text
