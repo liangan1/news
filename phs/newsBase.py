@@ -58,7 +58,7 @@ class NewsParserBase:
          self.url = url
          self.soup = Spider(url).soup() #convert html to BeautifulSoup object
       
-     def get_tag_by_attr(self, tag = "ul", attr = "class", value = ""):
+     def get_tag_by_attr(self, tag = "ul", attr = "", value = ""):
           '''
           The news list are generally 'ul/table' tag with specific 'class' name in html.
           Every news is generally a 'href' tag (hyperlink).
@@ -72,8 +72,11 @@ class NewsParserBase:
               </ul>
           '''
           tags = None
-          for body in self.soup: 
-              tags = body.find_all(tag, attrs={attr:value})
+          for body in self.soup:
+              if attr == "":
+                 body.find_all(tag)
+              else:
+                 tags = body.find_all(tag, attrs={attr:value})
               if tags is not None and len(tags):
                  break 
           return tags
@@ -119,7 +122,7 @@ class NewsParserBase:
                           if a_tag is not None and date is not None \
                              and isinstance(a_tag, bs4.element.Tag):
                               attrs = a_tag.attrs
-                              href = root_url + attrs['href']
+                              href = self.url#root_url + attrs['href']
                               title = a_tag.text
                               self.news_list.append(News(university = university,
                                                     school = school, title = title,
