@@ -10,9 +10,11 @@ class AHUCSNews(newsBase.NewsParserBase):
          super().__init__(url)
          
      def parse_html(self): 
-         a_tags = self.get_tag_by_name("ul", "nlist")
+         target_tags = self.get_tag_by_attr(value="nlist")
          root_url = "cs.ahu.edu.cn"
-         for li_tag in a_tags.find_all("li"):
+         print(len(target_tags))
+         for tag in target_tags:
+             for li_tag in tag.find_all("li"):
                a_tag = li_tag.find("a")
                attrs = a_tag.attrs
                href = root_url + attrs['href']

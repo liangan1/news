@@ -10,5 +10,5 @@ git clone https://github.com/liangan1/news.git
 cd news
 export PYTHONPATH=$PYTHONPATH:$(pwd)/phs:export PYTHONPATH=$PYTHONPATH:$(pwd)
 cd phs/phs/university
-python anhui_university.py
+python tsinghua_university.py
 ```

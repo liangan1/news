@@ -3,6 +3,8 @@
 from spider import Spider
 import datetime
 from abc import abstractmethod
+import re
+import bs4
 
 class News:
      """
@@ -41,15 +43,24 @@ class NewsParserBase:
      """
    The abstract base class is used to parse news from every university.
      """
-     def __init__(self, url=""):
-          self.url = url
-          self.soup = Spider(url).soup() #convert html to BeautifulSoup object
-          self.news_list = []
+     def __init__(self):
+         self.news_list = []
+
+     def set_target_url(self, url = ""):
+         '''
+           You can change the website url to support multi website for one collegue
+           eg: for Tsinghua university you may get news from 3 website:
+               http://yz.tsinghua.edu.cn/publish/yjszs/8562/index.html
+               http://yz.tsinghua.edu.cn/publish/yjszs/8550/index.html
+               http://www.cs.tsinghua.edu.cn
+         '''
+         self.url = url
+         self.soup = Spider(url).soup() #convert html to BeautifulSoup object
       
-     def get_tag_by_name(self, tag = "ul", class_name = ""):
+     def get_tag_by_attr(self, tag = "ul", attr = "class", value = ""):
           '''
           The news list are generally 'ul/table' tag with specific 'class' name in html.
-          Every news is generally a 'ref' tag.
+          Every news is generally a 'href' tag (hyperlink).
           For example:
               <ul class="nlist">
                  <div> 
@@ -61,14 +72,69 @@ class NewsParserBase:
           '''
           tags = None
           for body in self.soup: 
-              tags = body.find(tag, attrs={"class":class_name})
+              tags = body.find_all(tag, attrs={attr:value})
               if tags is not None:
                  break 
           return tags
+          
+     def get_news_date(self, tag = None):
+         '''
+         DFS(Depth First Search) is used to find the news date
+         '''
+         date_str = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",str(tag))
+         if date_str is not None:
+            return datetime.datetime.strptime(date_str[0], "%Y-%m-%d")  
+         if isinstance(tag, bs4.element.Tag):
+            for child in tag.children:
+                self.get_news_date(child)
+   
+
+     def parse_target_tags(self, tags = None, root_url = "", 
+                           university = "", school = "", is_deeper = False):
+         '''
+         Generally, every news is hyperlink.
+         '''
+         for tag in tags:
+             for child in tag.children:
+                 if is_deeper:
+                     for child_child in child:
+                          date = self.get_news_date(child_child)
+                          a_tag = child_child.find("a")
+                          if a_tag is not None and isinstance(a_tag, bs4.element.Tag):
+                              print(a_tag)
+                              attrs = a_tag.attrs
+                              href = root_url + attrs['href']
+                              title = a_tag.text
+                              self.news_list.append(News(university = university,
+                                                    school = school, title = title,
+                                                    date = date, href = href))                  
+                 else:
+                     date = self.get_news_date(child)
+                     a_tag = child.find("a")
+                     if a_tag is not None and isinstance(a_tag, bs4.element.Tag):
+                         print(a_tag)
+                         attrs = a_tag.attrs
+                         href = root_url + attrs['href']
+                         title = a_tag.text
+                         self.news_list.append(News(university = university,
+                                               school = school, title = title,
+                                               date = date, href = href))
+               
 
      @abstractmethod
-     def parse_html(self): 
-          raise RuntimeError(' "parse_html". method must be overwrite in subclass')
+     def parse_html(self):
+         '''
+         This is abstractmethod and must be overwrite in subclass.         
+         The steps are as follows:
+            1. set_target_url 
+               Set the source url where you want to get news
+            2. get_tag_by_attr
+               Get target tags block  by specific tag name with attr.
+               such "<div class="bs_infor>"" 
+            3. get_news_date and parse_target_tags will be used
+               to get news.  
+         '''  
+         raise RuntimeError(' "parse_html". method must be overwrite in subclass')
       
      def get_today_news(self):
          '''
