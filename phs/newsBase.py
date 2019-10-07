@@ -113,6 +113,8 @@ class NewsParserBase:
          '''
          Generally, every news is hyperlink.
          '''
+         if tags is None:
+            return
          for tag in tags:
              for child in tag.children:
                  if is_deeper:
