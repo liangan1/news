@@ -107,9 +107,29 @@ class NewsParserBase:
             for child in tag.children:
                 self.get_news_date(child)
    
+     def get_current_url_directory(self):
+         if self.url.find("htm") != -1:
+            last_sep_index = self.url.rfind("/") 
+            return self.url[0:last_sep_index + 1]        
+         else:
+            return self.url + "/" 
+   
+     def get_date_by_href_html_date_format_1(self, href = ""):
+         href = href if href.find("http") == 0 else self.get_current_url_directory() + href 
+         href_soup = str(Spider(href).soup())
+         date_str = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",str(href_soup))
+         if date_str is not None and self.validate(date_str[0]):
+            return datetime.datetime.strptime(date_str[0], "%Y-%m-%d")
+
+     def get_date_by_href_html_date_format_2(self, href = ""):
+         href = href if href.find("http") == 0 else self.get_current_url_directory() + href
+         href_soup = str(Spider(href).soup())
+         date_str = re.search(r"(\d{4}年\d{1,2}月\d{1,2}日)",str(href_soup))
+         if date_str is not None and self.validate(date_str[0]):
+            return datetime.datetime.strptime(date_str[0], "%Y年%m月%d日")
 
      def parse_target_tags(self, tags = None, root_url = "", 
-                           university = "", school = "", is_deeper = False):
+                           university = "", school = "", is_deeper = False, date_format = 0):
          '''
          Generally, every news is hyperlink.
          '''
@@ -121,23 +141,38 @@ class NewsParserBase:
                      for child_child in child:
                           date = self.get_news_date(child_child)
                           a_tag = child_child.find("a")
-                          if a_tag is not None and date is not None \
+                          if a_tag is not None \
                              and isinstance(a_tag, bs4.element.Tag):
                               attrs = a_tag.attrs
-                              href = self.url#root_url + attrs['href']
+                              href = attrs['href'] if attrs['href'].find("http") == 0 \
+                                      else self.get_current_url_directory() + attrs['href']
                               title = a_tag.text
-                              self.news_list.append(News(university = university,
+                              if date_format == 1:
+                                  date = self.get_date_by_href_html_date_format_1(attrs['href'])
+                              elif date_format == 2:
+                                  date = self.get_date_by_href_html_date_format_2(attrs['href'])
+
+
+                              if date is not None:
+                                 self.news_list.append(News(university = university,
                                                     school = school, title = title,
                                                     date = date, href = href))                  
                  else:
                      date = self.get_news_date(child)
                      a_tag = child.find("a")
-                     if a_tag is not None and date is not None \
+                     if a_tag is not None \
                         and isinstance(a_tag, bs4.element.Tag):
                          attrs = a_tag.attrs
-                         href = root_url + attrs['href']
+                         href = attrs['href']  if attrs['href'].find("http") == 0 \
+                                else self.get_current_url_directory() + attrs['href']
                          title = a_tag.text
-                         self.news_list.append(News(university = university,
+                         if date_format == 1:
+                             date = self.get_date_by_href_html_date_format_1(attrs['href'])
+                         elif date_format == 2:
+                             date = self.get_date_by_href_html_date_format_2(attrs['href'])
+
+                         if date is not None:
+                            self.news_list.append(News(university = university,
                                                school = school, title = title,
                                                date = date, href = href))
                
