@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-from spider import Spider
+import phs.spider
 import datetime
 from abc import abstractmethod
 import re
@@ -56,7 +56,7 @@ class NewsParserBase:
                http://www.cs.tsinghua.edu.cn
          '''
          self.url = url
-         self.soup = Spider(url).soup() #convert html to BeautifulSoup object
+         self.soup = phs.spider.Spider(url).soup() #convert html to BeautifulSoup object
       
      def get_tag_by_attr(self, tag = "ul", attr = "", value = ""):
           '''
@@ -116,14 +116,14 @@ class NewsParserBase:
    
      def get_date_by_href_html_date_format_1(self, href = ""):
          href = href if href.find("http") == 0 else self.get_current_url_directory() + href 
-         href_soup = str(Spider(href).soup())
+         href_soup = str(phs.spider(href).soup())
          date_str = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",str(href_soup))
          if date_str is not None and self.validate(date_str[0]):
             return datetime.datetime.strptime(date_str[0], "%Y-%m-%d")
 
      def get_date_by_href_html_date_format_2(self, href = ""):
          href = href if href.find("http") == 0 else self.get_current_url_directory() + href
-         href_soup = str(Spider(href).soup())
+         href_soup = str(phs.spider(href).soup())
          date_str = re.search(r"(\d{4}年\d{1,2}月\d{1,2}日)",str(href_soup))
          if date_str is not None and self.validate(date_str[0]):
             return datetime.datetime.strptime(date_str[0], "%Y年%m月%d日")
