@@ -57,7 +57,6 @@ class NewsParserBase:
          '''
          self.url = url
          self.soup = Spider(url).soup() #convert html to BeautifulSoup object
-      
      def get_tag_by_attr(self, tag = "ul", attr = "", value = ""):
           '''
           The news list are generally 'ul/table' tag with specific 'class' name in html.
@@ -145,7 +144,7 @@ class NewsParserBase:
                              and isinstance(a_tag, bs4.element.Tag):
                               attrs = a_tag.attrs
                               href = attrs['href'] if attrs['href'].find("http") == 0 \
-                                      else self.get_current_url_directory() + attrs['href']
+                                      else root_url + attrs['href']
                               title = a_tag.text
                               if date_format == 1:
                                   date = self.get_date_by_href_html_date_format_1(attrs['href'])
@@ -164,7 +163,7 @@ class NewsParserBase:
                         and isinstance(a_tag, bs4.element.Tag):
                          attrs = a_tag.attrs
                          href = attrs['href']  if attrs['href'].find("http") == 0 \
-                                else self.get_current_url_directory() + attrs['href']
+                                else root_url + attrs['href']
                          title = a_tag.text
                          if date_format == 1:
                              date = self.get_date_by_href_html_date_format_1(attrs['href'])
